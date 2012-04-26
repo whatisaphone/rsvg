@@ -1,4 +1,5 @@
 import ctypes
+import math
 from . import lib
 
 
@@ -61,10 +62,30 @@ class RSVG:
         return True
 
 
-    def render_cairo(self, *, size=None):
-        w, h = self.size
-        surface = lib.cairo.cairo_image_surface_create(lib.CAIRO_FORMAT_ARGB32,
-                                                       size or w, size or h)
+    def calc_size_and_affine(self, *, size=None, affine=None):
+        self_w, self_h = self.size
+
+        if size:
+            w, h = size
+        elif affine:
+            w = math.ceil(affine[0] + affine[2])
+            h = math.ceil(affine[1] + affine[3])
+        else:
+            w, h = self_w, self_h
+
+        if affine:
+            matrix = lib.cairo_matrix_t(affine[0] / self_w, affine[1] / self_h,
+                                        affine[2] / self_w, affine[3] / self_h,
+                                        affine[4], affine[5])
+        else:
+            matrix = lib.cairo_matrix_t(w / self_w, 0, 0, h / self_h, 0, 0)
+
+        return w, h, matrix
+
+    def render_cairo(self, *, size=None, affine=None):
+        w, h, matrix = self.calc_size_and_affine(size=size, affine=affine)
+
+        surface = lib.cairo.cairo_image_surface_create(lib.CAIRO_FORMAT_ARGB32, w, h)
         try:
             if lib.cairo.cairo_surface_status(surface) != lib.CAIRO_STATUS_SUCCESS:
                 raise ValueError
@@ -74,8 +95,7 @@ class RSVG:
                 if lib.cairo.cairo_status(cairo) != lib.CAIRO_STATUS_SUCCESS:
                     raise ValueError
 
-                if size:
-                    lib.cairo.cairo_scale(cairo, size / w, size / h)
+                lib.cairo.cairo_set_matrix(cairo, matrix)
                 if not lib.rsvg.rsvg_handle_render_cairo(self.handle, cairo):
                     raise ValueError
 

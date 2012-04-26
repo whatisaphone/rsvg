@@ -50,6 +50,15 @@ cairo_tp = ctypes.c_void_p
 cairo_surface_tp = ctypes.c_void_p
 cairo_write_func_t = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint)
 
+class cairo_matrix_t(ctypes.Structure):
+    _fields_ = (('xx', ctypes.c_double),
+                ('yx', ctypes.c_double),
+                ('xy', ctypes.c_double),
+                ('yy', ctypes.c_double),
+                ('x0', ctypes.c_double),
+                ('y0', ctypes.c_double))
+cairo_matrix_tp = ctypes.POINTER(cairo_matrix_t)
+
 CAIRO_STATUS_SUCCESS   = 0
 CAIRO_STATUS_NO_MEMORY = 1
 
@@ -69,6 +78,8 @@ cairo.cairo_destroy.argtypes = [cairo_tp]
 cairo.cairo_status.argtypes = [cairo_tp]
 
 cairo.cairo_scale.argtypes = [cairo_tp, ctypes.c_double, ctypes.c_double]
+
+cairo.cairo_set_matrix.argtypes = [cairo_tp, cairo_matrix_tp]
 
 cairo.cairo_image_surface_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int]
 cairo.cairo_image_surface_create.restype = cairo_surface_tp
