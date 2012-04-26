@@ -42,10 +42,7 @@ class RSVG:
         return dimensions.width, dimensions.height
 
 
-    def render_pixbuf(self, *, size=None):
-        if size:
-            raise ValueError("can't set size when rendering using pixbuf")
-
+    def render_pixbuf(self):
         pixbuf = lib.rsvg.rsvg_handle_get_pixbuf(self.handle)
         try:
             self.buffer = []
