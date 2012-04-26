@@ -79,7 +79,17 @@ class RSVG:
 
         return w, h, matrix
 
-    def render_cairo(self, *, size=None, affine=None):
+    def calc_matte(self, matte):
+        if matte is None:
+            return None
+        elif len(matte) == 4:
+            return matte
+        elif len(matte) == 3:
+            return tuple(matte) + (1,)
+        else:
+            raise ValueError
+
+    def render_cairo(self, *, size=None, affine=None, matte=None):
         w, h, matrix = self.calc_size_and_affine(size=size, affine=affine)
 
         surface = lib.cairo.cairo_image_surface_create(lib.CAIRO_FORMAT_ARGB32, w, h)
@@ -92,14 +102,18 @@ class RSVG:
                 if lib.cairo.cairo_status(cairo) != lib.CAIRO_STATUS_SUCCESS:
                     raise ValueError
 
+                matte = self.calc_matte(matte)
+                if matte:
+                    lib.cairo.cairo_set_source_rgba(cairo, *matte)
+                    lib.cairo.cairo_paint(cairo)
+
                 lib.cairo.cairo_set_matrix(cairo, matrix)
                 if not lib.rsvg.rsvg_handle_render_cairo(self.handle, cairo):
                     raise ValueError
 
                 self.buffer = []
                 callback = lib.cairo_write_func_t(self.render_cairo_callback)
-                if lib.cairo.cairo_surface_write_to_png_stream(
-                        surface, callback, None):
+                if lib.cairo.cairo_surface_write_to_png_stream(surface, callback, None):
                     raise ValueError
                 return b''.join(self.buffer)
             finally:

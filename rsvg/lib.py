@@ -77,6 +77,10 @@ cairo.cairo_destroy.argtypes = [cairo_tp]
 
 cairo.cairo_status.argtypes = [cairo_tp]
 
+cairo.cairo_set_source_rgba.argtypes = [cairo_tp, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double]
+
+cairo.cairo_paint.argtypes = [cairo_tp]
+
 cairo.cairo_scale.argtypes = [cairo_tp, ctypes.c_double, ctypes.c_double]
 
 cairo.cairo_set_matrix.argtypes = [cairo_tp, cairo_matrix_tp]
