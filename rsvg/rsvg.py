@@ -42,13 +42,13 @@ class RSVG:
         return dimensions.width, dimensions.height
 
 
-    def render_pixbuf(self):
+    def render_pixbuf(self, format='png'):
         pixbuf = lib.rsvg.rsvg_handle_get_pixbuf(self.handle)
         try:
             self.buffer = []
             callback = lib.GdkPixbufSaveFunc(self.render_pixbuf_callback)
             if not lib.gdk_pixbuf.gdk_pixbuf_save_to_callbackv(pixbuf,
-                    callback, None, b'png', None, None, None):
+                    callback, None, format.encode('utf-8'), None, None, None):
                 raise ValueError
             return b''.join(self.buffer)
         finally:
